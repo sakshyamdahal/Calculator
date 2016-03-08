@@ -3,7 +3,6 @@
 //  Calculator
 //
 //  Created by Sakshyam Dahal on 3/7/16.
-//  Copyright © 2016 Sakshyam Dahal. All rights reserved.
 //
 
 import UIKit
@@ -13,6 +12,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var display: UILabel!
     var userIsInTheMiddleOfTypingANumber = false
     
+    var brain = CalculatorBrain()
     
     @IBAction func appendDigit(sender: UIButton) {
         
@@ -28,45 +28,31 @@ class ViewController: UIViewController {
     
     
     @IBAction func operate(sender: UIButton) {
-        let operation = sender.currentTitle!
+        
         
         if userIsInTheMiddleOfTypingANumber {
             enter()
         }
         
-        switch operation {
-        case "−": performOperation { $1 - $0 }
-        case "×": performOperation { $0 * $1 }
-        case "+": performOperation { $0 + $1 }
-        case "÷": performOperation { $1 / $0 }
-        case "√": performOperation { sqrt($0) }
-        default: break
+        if let operation = sender.currentTitle {
+            if let result = brain.performOperation(operation) {
+                displayValue = result
+            } else {
+                displayValue = 0
+            }
         }
     }
     
-    func performOperation(operation: (Double, Double) -> Double ) {
-        if operandStack.count >= 2 {
-            displayValue = operation(operandStack.removeLast(), operandStack.removeLast())
-            enter()
-        }
-    }
     
-    @nonobjc
-    func performOperation(operation: Double -> Double ) {
-        if operandStack.count >= 1 {
-            displayValue = operation(operandStack.removeLast())
-            enter()
-        }
-    }
 
-    
-    var operandStack = [Double]()
 
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
-        operandStack.append(displayValue)
-        
-        print("\(operandStack)")
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
     }
     
     var displayValue: Double {
